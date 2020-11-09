@@ -1,21 +1,24 @@
-const express =require('express');
-const bodyParser = require('body-parser');
 const path = require('path');
 
+const express =require('express');
+const bodyParser = require('body-parser');
+
+const errorController = require('./controllers/error');
+
 const app = express();//functionとしてimportされる
+
+app.set('view engine','ejs');//template engineをセット
+app.set('views','views');//viewファイルのフォルダ名をセット
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
 app.use(bodyParser.urlencoded({extended:false}));
-
+app.use(express.static(path.join(__dirname,'public')));//publicフォルダの場所を指定する
 app.use('/admin',adminRoutes);//routeオブジェクトをそのまま引数に(第一引数にsegmentをセット)
 app.use(shopRoutes);//routeオブジェクトをそのまま引数に
 
-app.use('/',(req,res,next)=>{
-    res.status(404).sendFile(path.join(__dirname,'views','404.html'));
-
-});
+app.use('/',errorController.get404);
 
 // const server = http.createServer(app);
 // server.listen(3000);　↓expressによってhttpモジュールを使わずに以下のように短くかける↓

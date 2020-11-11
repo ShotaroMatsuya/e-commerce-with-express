@@ -27,6 +27,7 @@ module.exports = class Product{
 
     }
     save(){
+        this.id = Math.random().toString();
         getProductsFromFile(products=>{
             products.push(this);
             fs.writeFile(p,JSON.stringify(products),(err)=>{
@@ -34,8 +35,18 @@ module.exports = class Product{
             });//javascriptオブジェクトをjsonフォーマットに変換
         });
     }
+
+    //fetchしたあとに実行したい処理をコールバック関数で受け取る
     static fetchAll(cb){
         getProductsFromFile(cb);
+    }
+    //fetchしたあとに実行したい処理をコールバック関数で受け取る
+
+    static findById(id,cb){
+        getProductsFromFile(products=>{
+            const product = products.find(p=> p.id === id);
+            cb(product);
+        })
     }
 
 }

@@ -1,3 +1,4 @@
+const { timeStamp } = require('console');
 const fs = require('fs');
 const path = require('path');
 
@@ -19,7 +20,8 @@ const getProductsFromFile = cb =>{//readFileが終了したあとに実行した
 }
 
 module.exports = class Product{
-    constructor(title,imageUrl,description,price){
+    constructor(id,title,imageUrl,description,price){
+        this.id = id;
         this.title = title;
         this.imageUrl = imageUrl;
         this.description = description;
@@ -27,12 +29,25 @@ module.exports = class Product{
 
     }
     save(){
-        this.id = Math.random().toString();
+        
         getProductsFromFile(products=>{
-            products.push(this);
-            fs.writeFile(p,JSON.stringify(products),(err)=>{
-                console.log(err);
-            });//javascriptオブジェクトをjsonフォーマットに変換
+            if(this.id){//すでにidが存在している場合(updateしたいとき)
+                const existingProductIndex = products.findIndex(prod =>{
+                    prod.id === this.id; 
+                });
+                const updatedProducts = [...products];
+                updatedProducts[existingProductIndex] = this;
+                fs.writeFile(p,JSON.stringify(updatedProducts),(err)=>{
+                    console.log(err);
+                });//javascriptオブジェクトをjsonフォーマットに変換
+            }else{//新しい商品を追加する場合
+                this.id = Math.random().toString();
+                products.push(this);
+                fs.writeFile(p,JSON.stringify(products),(err)=>{
+                    console.log(err);
+                });//javascriptオブジェクトをjsonフォーマットに変換
+
+            }
         });
     }
 

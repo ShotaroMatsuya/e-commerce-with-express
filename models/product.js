@@ -90,7 +90,7 @@ class Product{
     this.price = price;
     this.description = description;
     this.imageUrl = imageUrl;
-    this._id = id ? new mongodb.ObjectId(id) : null;//MongoDBでidを使用するにはconstructorにセットする必要がある
+    this._id = id ? new mongodb.ObjectId(id) : null;//MongoDBでidを使用するにはidを特殊なオブジェクトに変換する必要がある
     this.userId = userId;
   }
   save(){
@@ -101,7 +101,7 @@ class Product{
       dbOp = db.collection('products')
       .updateOne({_id: this._id},{$set:this});//上書きするには$setを使う
     }else{
-      dbOp = db.collection('products').insertOne(this);
+      dbOp = db.collection('products').insertOne(this);//新しく追加
     }
     return dbOp
     .then(result=>{
@@ -127,11 +127,10 @@ class Product{
   static findById(prodId){
     const db = getDb();
     return db.collection('products')
-      // .find({_id:prodId}) //_idは特殊なオブジェクトになっている。値を取り出すためには一工夫必要
+      // .find({_id:prodId}) //_idは特殊なオブジェクトになっている。string型を変換する必要がある
       .find({_id:new mongodb.ObjectId(prodId)})
-      .next()
+      .next() //もし複数あったら最後の1件を抽出
       .then(product=>{
-        console.log(product);
         return product;
       })
       .catch(err=>{

@@ -24,7 +24,7 @@ exports.postAddProduct =(req,res,next)=>{
       description,
       imageUrl,
       null,
-      req.user._id
+      req.user._id//ここはstring型になっている(かんたんにrelationを追加できるのがNoSQLの強み)
       );
     product.save()
     .then(result => {

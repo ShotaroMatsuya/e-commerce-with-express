@@ -34,12 +34,68 @@ class User{
       .updateOne(
       {_id:new ObjectId(this._id)},
       {$set:{cart:updatedCart}});
-  
+
+  }
+  getCart(){
+    const db = getDb();
+    const productIds = this.cart.items.map(i=>{//カートに入ったproductIdを配列で取得
+      return i.productId;
+    });
+    return db.collection('products')
+      .find({_id:{$in:productIds}}) //$inに配列をセットすると配列の要素と一致するproductIdをまとめて取得(orの働き)
+      .toArray()
+      .then(products=>{//productsは配列(id以外の情報も入っている)
+        return products.map(p=>{
+          return{
+            ...p,
+            quantity:this.cart.items.find(i =>{
+              return i.productId.toString() === p._id.toString();
+            }).quantity
+          };
+        });
+      });
+  }
+  deleteItemFromCart(productId){
+    const updatedCartItems = this.cart.items.filter(item=>{
+      return item.productId.toString() !== productId.toString();
+    });
+    const db = getDb();
+    return db.collection('users')
+      .updateOne(
+        {_id:new ObjectId(this._id)},
+        {$set:{cart:{items:updatedCartItems}}}//$setで指定したフィールドのみが更新される
+      );
+  }
+  addOrder(){
+    const db = getDb();
+    return this.getCart()
+      .then(products =>{//[{...productオブジェクト,quantity:x},{...}]
+      const order = {
+        items:products,
+        user:{
+          _id:new ObjectId(this._id),
+          name:this.name,
+        }
+      };
+      return db.collection('orders').insertOne(order);
+    }).then(result=>{
+      this.cart = {items:[]};//ordersに追加したあとはcartを空に
+      return db.collection('users').updateOne(
+        {_id: new ObjectId(this._id)},
+        {$set:{cart:{items:[]}}}//ordersに追加したあとはcartを空に
+      );
+    });
+  }
+  getOrders(){
+    const db = getDb();
+    return db.collection('orders')
+      .find({'user._id':new ObjectId(this._id)})
+      .toArray();
   }
   static findById(userId){
     const db = getDb();
     return db.collection('users')
-      .findOne({_id:new ObjectId(userId)})
+      .findOne({_id:new ObjectId(userId)})//find().next()の代わり
       .then(user=>{
         console.log(user);
         return user;

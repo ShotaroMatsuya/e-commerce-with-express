@@ -18,14 +18,21 @@ exports.postAddProduct =(req,res,next)=>{
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
-    const product = new Product(
-      title,
-      price,
-      description,
-      imageUrl,
-      null,
-      req.user._id//ここはstring型になっている(かんたんにrelationを追加できるのがNoSQLの強み)
-      );
+    const product = new Product({
+      title:title,
+      price:price,
+      description:description,
+      imageUrl:imageUrl,
+      userId:req.user //mongooseはuserモデルインスタンスをそのままセットするとidのみをextractしてくれる
+    });
+    // const product = new Product(
+    //   title,
+    //   price,
+    //   description,
+    //   imageUrl,
+    //   null,
+    //   req.user._id//ここはstring型になっている(かんたんにrelationを追加できるのがNoSQLの強み)
+    //   );
     product.save()
     .then(result => {
       // console.log(result);
@@ -43,7 +50,6 @@ exports.getEditProduct = (req,res,next)=>{
     }
     const prodId = req.params.productId;
     Product.findById(prodId)
-    // Product.findById(prodId)
     .then(product => {
       if (!product) {
         return res.redirect('/');
@@ -64,23 +70,30 @@ exports.postEditProduct = (req,res,next)=>{
     const updatedPrice = req.body.price;
     const updatedImageUrl = req.body.imageUrl;
     const updatedDesc = req.body.description;
-    const product = new Product(
-      updatedTitle,
-      updatedPrice,
-      updatedDesc,
-      updatedImageUrl,
-      prodId
-      );
-      
-    product.save()
-    .then(result => {
+    Product.findById(prodId).then(product=>{
+      product.title =updatedTitle;
+      product.price = updatedPrice;
+      product.description = updatedDesc;
+      product.imageUrl = updatedImageUrl;
+      return product.save();
+    }).then(result => {
       console.log('UPDATED PRODUCT!');
       res.redirect('/admin/products');
     })
     .catch(err => console.log(err));
+    // const product = new Product(
+    //   updatedTitle,
+    //   updatedPrice,
+    //   updatedDesc,
+    //   updatedImageUrl,
+    //   prodId
+    //   );
+
 }
 exports.getProducts = (req,res,next)=>{
-    Product.fetchAll()
+    Product.find()
+    // .select('title price - _id')//抽出するProductモデルのフィールドを指定(titleとpriceを取得しidを除くという意味)
+    // .populate('userId','name')//productモデルのuserIdからuserモデルを抽出し、さらにuserモデルのnameのみを抽出するという意味
     .then(products => {
       res.render('admin/products', {
         prods: products,
@@ -92,7 +105,7 @@ exports.getProducts = (req,res,next)=>{
 }
 exports.postDeleteProduct =(req,res,next)=>{
     const prodId = req.body.productId;
-    Product.deleteById(prodId)
+    Product.findByIdAndRemove(prodId)
     .then(() => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');

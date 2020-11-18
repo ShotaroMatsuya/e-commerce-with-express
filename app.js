@@ -2,9 +2,10 @@ const path = require('path');
 
 const express =require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const errorController = require('./controllers/error');
-const mongoConnect = require('./util/database').mongoConnect;
+// const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
 
 const app = express();//functionとしてimportされる
@@ -19,9 +20,9 @@ app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static(path.join(__dirname,'public')));//publicフォルダの場所を指定する
 
 app.use((req, res, next) => {
-    User.findById("5fb210aaa17441a70b1102c1")
+    User.findById("5fb4cb6c16bea6171d1af775")
       .then(user => {
-        req.user = new User(user.name,user.email,user.cart,user._id);
+        req.user = user;
         next();
       })
       .catch(err => console.log(err));
@@ -41,6 +42,26 @@ app.use('/',errorController.get404);
 // app.listen(3000);
 
 
-mongoConnect(()=>{
-  app.listen(3000);
-});
+// mongoConnect(()=>{
+//   app.listen(3000);
+// });
+mongoose.connect('mongodb+srv://shotaro:S6PmAPGB9tnOdkE2@cluster0.h29dy.mongodb.net/shop?retryWrites=true&w=majority')
+  .then(result=>{
+    User.findOne().then(user =>{
+      if(!user){
+        const user = new User({
+          name:'Shotaro',
+          email:'test@test.com',
+          cart:{
+            items:[]
+          }
+        });
+        user.save();
+
+      }
+    });
+    app.listen(3000);
+  }
+  ).catch(err =>{
+    console.log(err);
+  });

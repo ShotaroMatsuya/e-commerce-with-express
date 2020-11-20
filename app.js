@@ -3,35 +3,42 @@ const path = require('path');
 const express =require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-
+const session = require('express-session');
+const MongoDBStore  = require('connect-mongodb-session')(session);//sessionをmongoDBで保持する。引数にsessionオブジェクトを渡す
 const errorController = require('./controllers/error');
 // const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
+const MONGODB_URI = 'mongodb+srv://shotaro:S6PmAPGB9tnOdkE2@cluster0.h29dy.mongodb.net/shop';
 
 const app = express();//functionとしてimportされる
+const store = new MongoDBStore({
+  uri:MONGODB_URI,
+  collection:'sessions'
+});
 
 app.set('view engine','ejs');//template engineをセット
 app.set('views','views');//viewファイルのフォルダ名をセット
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.static(path.join(__dirname,'public')));//publicフォルダの場所を指定する
+app.use(session({
+  secret:'my secret',
+  resave:false,
+  saveUninitialized:false,
+  store:store
+}));
+//resaveをfalseにすることでreqのたびにsessionを保存するのではなく、変化があったときのみに保存する(performanceがあがる)
 
-app.use((req, res, next) => {
-    User.findById("5fb4cb6c16bea6171d1af775")
-      .then(user => {
-        req.user = user;
-        next();
-      })
-      .catch(err => console.log(err));
-  
-  });
+
 
 
 app.use('/admin',adminRoutes);//routeオブジェクトをそのまま引数に(第一引数にsegmentをセット)
 app.use(shopRoutes);//routeオブジェクトをそのまま引数に
+app.use(authRoutes);
 
 app.use('/',errorController.get404);
 
@@ -45,7 +52,7 @@ app.use('/',errorController.get404);
 // mongoConnect(()=>{
 //   app.listen(3000);
 // });
-mongoose.connect('mongodb+srv://shotaro:S6PmAPGB9tnOdkE2@cluster0.h29dy.mongodb.net/shop?retryWrites=true&w=majority')
+mongoose.connect(MONGODB_URI)
   .then(result=>{
     User.findOne().then(user =>{
       if(!user){

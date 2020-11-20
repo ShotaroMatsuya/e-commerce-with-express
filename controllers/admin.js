@@ -23,7 +23,7 @@ exports.postAddProduct =(req,res,next)=>{
       price:price,
       description:description,
       imageUrl:imageUrl,
-      userId:req.session.user //mongooseはuserモデルインスタンスをそのままセットするとidのみをextractしてくれる
+      userId:req.user //mongooseはuserモデルインスタンスをそのままセットするとidのみをextractしてくれる
     });
     // const product = new Product(
     //   title,

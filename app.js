@@ -16,6 +16,7 @@ const store = new MongoDBStore({
   collection:'sessions'
 });
 
+
 app.set('view engine','ejs');//template engineをセット
 app.set('views','views');//viewファイルのフォルダ名をセット
 
@@ -32,6 +33,19 @@ app.use(session({
   store:store
 }));
 //resaveをfalseにすることでreqのたびにsessionを保存するのではなく、変化があったときのみに保存する(performanceがあがる)
+
+app.use((req,res,next)=>{
+  if(!req.session.user){
+    return next();
+  }
+  User.findById(req.session.user._id)
+      .then(user => {
+        req.user = user;//mongooseのmodelオブジェクトをセット
+        next();
+      })
+      .catch(err => console.log(err));
+});
+
 
 
 

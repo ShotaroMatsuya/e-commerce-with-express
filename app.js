@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore  = require('connect-mongodb-session')(session);//sessionをmongoDBで保持する。引数にsessionオブジェクトを渡す
 const csrf = require('csurf');
+const flash = require('connect-flash');
 
 const errorController = require('./controllers/error');
 // const mongoConnect = require('./util/database').mongoConnect;
@@ -38,6 +39,9 @@ app.use(session({
 }));
 //resaveをfalseにすることでreqのたびにsessionを保存するのではなく、変化があったときのみに保存する(performanceがあがる)
 app.use(csrfProtection);
+//init connect-flash
+app.use(flash());
+
 app.use((req,res,next)=>{
   if(!req.session.user){
     return next();
@@ -50,7 +54,12 @@ app.use((req,res,next)=>{
       .catch(err => console.log(err));
 });
 
-
+app.use((req,res,next)=>{
+  //res.localsはviewに自動的に渡されるvariable
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 
 

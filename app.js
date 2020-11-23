@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore  = require('connect-mongodb-session')(session);//sessionをmongoDBで保持する。引数にsessionオブジェクトを渡す
+const csrf = require('csurf');
+
 const errorController = require('./controllers/error');
 // const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
@@ -15,6 +17,8 @@ const store = new MongoDBStore({
   uri:MONGODB_URI,
   collection:'sessions'
 });
+//init csurf
+const csrfProtection = csrf();
 
 
 app.set('view engine','ejs');//template engineをセット
@@ -33,7 +37,7 @@ app.use(session({
   store:store
 }));
 //resaveをfalseにすることでreqのたびにsessionを保存するのではなく、変化があったときのみに保存する(performanceがあがる)
-
+app.use(csrfProtection);
 app.use((req,res,next)=>{
   if(!req.session.user){
     return next();
@@ -68,19 +72,6 @@ app.use('/',errorController.get404);
 // });
 mongoose.connect(MONGODB_URI)
   .then(result=>{
-    User.findOne().then(user =>{
-      if(!user){
-        const user = new User({
-          name:'Shotaro',
-          email:'test@test.com',
-          cart:{
-            items:[]
-          }
-        });
-        user.save();
-
-      }
-    });
     app.listen(3000);
   }
   ).catch(err =>{

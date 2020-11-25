@@ -14,6 +14,7 @@
     "nodemon": "^1.18.3"
   },
   "dependencies": {
+    "@sendgrid/mail": "^7.4.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
@@ -23,6 +24,8 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "mongodb": "^3.6.3",
-    "mongoose": "^5.10.15"
+    "mongoose": "^5.10.15",
+    "nodemailer": "^6.4.16",
+    "nodemailer-sendgrid-transport": "^0.2.0"
   }
 }

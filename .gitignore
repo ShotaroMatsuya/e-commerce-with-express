@@ -1,4 +1,4 @@
 node_modules/
 .vscode/
 util/database.js
-controllers/auth.js
+controllers/config.js

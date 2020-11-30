@@ -26,7 +26,9 @@
     "express-validator": "^6.7.0",
     "mongodb": "^3.6.3",
     "mongoose": "^5.10.15",
+    "multer": "^1.4.2",
     "nodemailer": "^6.4.16",
-    "nodemailer-sendgrid-transport": "^0.2.0"
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "pdfkit": "^0.11.0"
   }
 }

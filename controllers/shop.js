@@ -1,3 +1,8 @@
+const fs = require('fs');
+const path = require('path');
+
+const PDFDocument = require('pdfkit');
+
 const Product = require('../models/product');
 const Order = require('../models/order');
 
@@ -193,3 +198,61 @@ exports.getCheckout = (req,res,next)=>{
         pageTitle:'Checkout'
     })
 }
+
+exports.getInvoice = (req,res,next) =>{
+  const orderId = req.params.orderId;
+  Order.findById(orderId)
+    .then(order =>{
+      if(!order){
+        return next(Error('No order Found.'));
+      }
+      if(order.user.userId.toString() !== req.user._id.toString()){
+        return next(new Error('Unauthorized'));
+      }
+      const invoiceName = 'invoice-'+ orderId + '.pdf';
+      const invoicePath = path.join('data','invoices',invoiceName);
+
+      const pdfDoc = new PDFDocument();
+      res.setHeader('Content-Type','application/pdf');
+      res.setHeader('Content-Disposition','inline; filename="' + invoiceName + '"');
+      pdfDoc.pipe(fs.createWriteStream(invoicePath));
+      pdfDoc.pipe(res);
+
+      pdfDoc.fontSize(26).text('Invoice',{
+        underline:true
+      });
+      pdfDoc.text('----------------------------');
+      let totalPrice = 0;
+      order.products.forEach(prod =>{
+        totalPrice += prod.quantity * prod.product.price;
+        pdfDoc.fontSize(14).text(
+          prod.product.title +
+          ' - ' +
+          prod.quantity +
+          ' x ' +
+          ' $ ' +
+          prod.product.price
+          );
+      });
+      pdfDoc.text('----');
+      pdfDoc.fontSize(20).text('Total Price: $ ' + totalPrice);
+
+      pdfDoc.end();
+      // readFileはentire contentを読み込むまで待たないと行けない
+    //   fs.readFile(invoicePath,(err,data) =>{
+    //     if(err){
+    //       return next(err);//err handle middlewareに渡す
+    //     } 
+    //     res.setHeader('Content-Type','application/pdf');
+    //     // res.setHeader('Content-Disposition','inline');//ブラウザで表示
+    //     res.setHeader('Content-Disposition','inline; filename="' + invoiceName + '"');
+    //     res.send(data);
+    // });
+    //chunkごとに分割して読み込む(大容量ファイルの場合はこちらを使用するべき)
+    // const file = fs.createReadStream(invoicePath);
+    // res.setHeader('Content-Type','application/pdf');
+    // res.setHeader('Content-Disposition','inline; filename="' + invoiceName + '"');
+    // file.pipe(res);//resオブジェクトにstreamingしたchunkを押し渡す(nodeアプリケーションがキャッシュを保持する必要がなくなりperformanceの向上が見込める。browserが自分でconcatenateする)
+  })
+  .catch(err => next(err));
+};

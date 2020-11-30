@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const stripe = require('stripe')('sk******');
+
+const config = require('./config');
 
 const PDFDocument = require('pdfkit');
 
@@ -197,13 +198,13 @@ exports.getCheckout = (req,res,next) =>{
     .execPopulate()//promiseオブジェクトにするために必要
     .then(user => {
       // console.log(user.cart.items);
-      const products = user.cart.items;
-      let total = 0;
+      products = user.cart.items;
+      total = 0;
       products.forEach(p =>{
         total += p.quantity * p.productId.price;
       });
-      return stripe.checkout.session.create({
-        payment_method_types:['card'],
+      return config.stripe.checkout.sessions.create({
+        payment_method_types:['card'],//credit card payment
         line_items:products.map(p=>{
           return {
             name:p.productId.title,
@@ -232,6 +233,36 @@ exports.getCheckout = (req,res,next) =>{
         });
 }
 
+exports.getCheckoutSuccess = (req, res, next) => {
+  req.user
+    .populate('cart.items.productId')//userモデルのcartフィールド内のproductIdからproductモデルを取得
+    .execPopulate()//promiseオブジェクトにするために必要
+    .then(user => {
+      // console.log(user.cart.items);
+      const products = user.cart.items.map(i=>{
+        return {quantity:i.quantity,product:{...i.productId._doc}};//このproductIdはproduct情報がすべて格納されたオブジェクト,_docとすることで内包されたデータがconsole上で読めるようになる
+      });
+      const order = new Order({
+        user:{
+          email:req.user.email,
+          userId:req.user
+        },
+        products:products
+      });
+      return order.save();
+    }).then(result=>{
+      return req.user.clearCart();     
+      })
+      .then(()=>{
+        return res.redirect('/orders');
+      })
+      .catch(err => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
+      });
+
+  };
 exports.postOrder = (req, res, next) => {
   req.user
     .populate('cart.items.productId')//userモデルのcartフィールド内のproductIdからproductモデルを取得

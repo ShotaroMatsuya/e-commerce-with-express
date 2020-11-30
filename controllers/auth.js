@@ -5,7 +5,7 @@ const { validationResult } = require('express-validator/check');
 
 const User = require('../models/user');
 
-const sgMail = require('./config');
+const config = require('./config');
 
 
 exports.getLogin = (req, res, next) => {
@@ -163,7 +163,7 @@ exports.postSignup = (req,res,next) =>{
             html:'<h1>You successfully signed up!</h1>'
           };
           res.redirect('/login');
-          return sgMail.send(msg);
+          return config.sgMail.send(msg);
         })
         .then(()=>{
           console.log('Email sent');
@@ -225,7 +225,7 @@ exports.postReset = (req,res,next)=>{
           `
         };
         res.redirect('/');
-        return sgMail.send(msg);
+        return config.sgMail.send(msg);
       })
       .catch(err => {
         const error = new Error(err);

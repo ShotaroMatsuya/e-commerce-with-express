@@ -1,4 +1,7 @@
 node_modules/
 .vscode/
 util/database.js
-controllers/config.js
+nodemon.json
+access.log
+server.cert
+server.key

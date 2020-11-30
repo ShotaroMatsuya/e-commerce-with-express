@@ -1,0 +1,20 @@
+<section class="pagination">
+
+    <% if(currentPage !== 1 && previousPage !== 1) {%>
+        <!-- 自分が1にいるとき、あるいは前のページが1のときは表示しない -->
+        <a href="?page=1">1</a>
+    <% } %> 
+    <% if(hasPreviousPage) {%>
+        <a href="?page=<%= previousPage  %>"><%= previousPage  %></a>
+    <% } %> 
+    
+        <a href="?page=<%= currentPage %>" class="active"><%= currentPage %> </a>
+    
+    <% if(hasNextPage) {%>
+        <a href="?page=<%= nextPage  %>"><%= nextPage  %></a>
+    <% } %> 
+    <% if(lastPage !== currentPage && nextPage !== lastPage) {%> 
+    <!-- 自分がlastPageか次のpageがlastPageの場合は表示しない -->
+    <a href="?page=<%= lastPage  %>"><%= lastPage  %></a>
+    <% } %> 
+</section>

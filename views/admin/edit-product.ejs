@@ -36,7 +36,8 @@
                     type="file" 
                     name="image" 
                     id="image" 
-                    value="<% if (editing  || hasError) { %><%= product.imageUrl %><% } %>">
+                    value="<% if (editing  || hasError) { %><%=  product.imageUrl %><% } %>">
+                    <% if (editing  || hasError) { %><img width="150px" src="<%= process.env.AWS_ROOT_PATH + product.imageUrl %>"><% } %>
             </div>
             <div class="form-control">
                 <label for="price">Price</label>

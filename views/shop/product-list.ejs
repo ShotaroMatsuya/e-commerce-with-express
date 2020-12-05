@@ -6,6 +6,12 @@
         <%- include('../includes/navigation.ejs') %>
 
             <main>
+                <ul class="category-list">
+                    <li class="category-item"><a class="btn active" href="">All</a></li>
+                    <li class="category-item"><a class="btn" href="">Category1</a></li>
+                    <li class="category-item"><a class="btn" href="">Category2</a></li>
+                    <li class="category-item"><a class="btn" href="">Category3</a></li>
+                </ul>
                 <% if (prods.length > 0) { %>
                     <div class="grid">
                         <% for (let product of prods) { %>

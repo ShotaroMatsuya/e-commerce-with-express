@@ -6,8 +6,20 @@
             <li class="main-header__item">
                 <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
             </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">Products</a>
+            <li class="main-header__item dropdown-li">
+                    <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">Products</a>
+                    <ul class="dropdown">
+                      <li class="dropdown-item">
+                        <a href="#" class="dropdown-link">Category 1</a>
+                      </li>
+                      <li class="dropdown-item">
+                        <a href="#" class="dropdown-link">Category 2</a>
+                      </li>
+                      <li class="dropdown-item">
+                        <a href="#" class="dropdown-link">Category 3</a>
+                      </li>
+                    </ul>
+                  
             </li>
             <% if (isAuthenticated) { %>
                 <li class="main-header__item">

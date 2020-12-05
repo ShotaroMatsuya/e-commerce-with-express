@@ -11,7 +11,8 @@ body {
 }
 
 main {
-  padding: 1rem;
+  padding-top: 1rem;
+  padding-bottom: 5rem;
   margin: auto;
 }
 
@@ -76,6 +77,66 @@ form {
 .main-header__item button:hover,
 .main-header__item button:active {
   color: #ffeb3b;
+}
+.dropdown-li {
+  position: relative;
+  z-index: 100;
+}
+.dropdown-li::after {
+  content: '\f078';
+  font-weight: bold;
+}
+.dropdown-li:hover .dropdown {
+  visibility: visible;
+  opacity: 1;
+}
+.dropdown {
+  position: absolute;
+  top: 3rem;
+  right: -2.8rem;
+  width: 10rem;
+  background-color: #e6e2e4;
+  padding: 1rem;
+  border-radius: 0.2rem;
+  text-align: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.dropdown-list {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+}
+.dropdown-item {
+  list-style: none;
+}
+.dropdown-link {
+  color: #333;
+  text-decoration: none;
+  font-size: 1.8rem;
+  transition: all 0.3s;
+}
+.dropdown-link:hover {
+  color: #999999;
+}
+.dropdown::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -1.5rem;
+  left: 7.3rem;
+  border-right: 15px solid transparent;
+  border-bottom: 15px solid #e6e2e4;
+  border-left: 15px solid transparent;
+}
+.dropdown-item {
+  margin: 0.5rem 0;
+}
+.dropdown-link {
+  font-weight: 300;
+  font-size: 1.6rem;
 }
 
 .mobile-nav {
@@ -219,7 +280,8 @@ form {
 }
 
 .btn:hover,
-.btn:active {
+.btn:active,
+.btn.active {
   background-color: #00695c;
   color: white;
 }
@@ -269,6 +331,15 @@ form {
 .pagination a.active {
   background: #00695c;
   color: white;
+}
+
+.category-list {
+  list-style: none;
+  display: flex;
+  justify-content: start;
+}
+.category-item {
+  margin: 0 20px;
 }
 
 @media (min-width: 768px) {

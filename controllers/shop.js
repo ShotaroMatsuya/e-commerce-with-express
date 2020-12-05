@@ -37,6 +37,7 @@ exports.getProducts = (req, res, next) => {
         nextPage: page + 1,
         previousPage: page - 1,
         lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+        category: 'all',
       });
     })
     .catch(err => {
@@ -63,14 +64,13 @@ exports.getProduct = (req, res, next) => {
 };
 exports.getIndex = (req, res, next) => {
   const page = +req.query.page || 1; //string型なのでnumber型にする必要がある
-  let totalItems;
+  const totalItems = 4;
   ITEMS_PER_PAGE = 4;
   Product.find()
     .countDocuments()
     .then(numProducts => {
-      totalItems = numProducts;
       return Product.aggregate()
-        .sample(10)
+        .sample(4)
         .skip((page - 1) * ITEMS_PER_PAGE) //飛ばす範囲(offsetのこと)
         .limit(ITEMS_PER_PAGE);
     })
@@ -94,7 +94,40 @@ exports.getIndex = (req, res, next) => {
       return next(error);
     });
 };
-exports.getCategory = (req, res, next) => {};
+exports.getCategory = (req, res, next) => {
+  const category = req.params.category;
+
+  const page = +req.query.page || 1; //string型なのでnumber型にする必要がある
+  let totalItems;
+  Product.find({ categories: { $in: [category] } })
+    .countDocuments()
+    .then(numProducts => {
+      totalItems = numProducts;
+      return Product.find({ categories: { $in: [category] } })
+        .skip((page - 1) * ITEMS_PER_PAGE) //飛ばす範囲(offsetのこと)
+        .limit(ITEMS_PER_PAGE);
+    })
+    .then(products => {
+      res.render('shop/category', {
+        prods: products,
+        pageTitle: category,
+        path: '/products',
+        //paginationLinkに必要なprops
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+        category: category,
+      });
+    })
+    .catch(err => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
 exports.getCart = (req, res, next) => {
   // Cart.getCart(cart=>{//cartはオブジェクト
   //     Product.fetchAll(products =>{//productsはarray

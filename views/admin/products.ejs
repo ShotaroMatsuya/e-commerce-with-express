@@ -19,9 +19,12 @@
                                     <img src="<%= process.env.AWS_ROOT_PATH + product.imageUrl %>" alt="<%= product.title %>">
                                 </div>
                                 <div class="card__content">
-                                    <h2 class="product__price">$
-                                        <%= product.price %>
-                                    </h2>
+                                    <h2 class="product__price">￥ <%= product.price %></h2>
+                                    <% for(let category of product.categories){ %>
+                                        <a class="btn category" href="/products/category/<%= category %>"><%= category %> </a>
+                                    
+                                    <% } %>
+                                    
                                     <p class="product__description">
                                         <%= product.description %>
                                     </p>

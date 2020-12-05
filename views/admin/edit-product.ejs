@@ -50,6 +50,17 @@
                     value="<% if (editing  || hasError) { %><%= product.price %><% } %>">
             </div>
             <div class="form-control">
+                <label for="categories">Categories</label>
+                <select name="categories" id="categories" size="5" multiple>
+                    <option value="food" <% if ((editing  || hasError) && product.categories.indexOf('food') > -1 ) { %> selected <% } %> >飲食物</option>
+                    <option value="daily" <% if ((editing  || hasError) && product.categories.indexOf('daily') > -1 ) { %> selected <% } %> >日用品</option>
+                    <option value="device" <% if ((editing  || hasError) && product.categories.indexOf('device') > -1 ) { %> selected<% } %> >PC関連</option>
+                    <option value="toy" <% if ((editing  || hasError) && product.categories.indexOf('toy') > -1 ) { %> selected <% } %> >レジャー</option>
+                    <option value="sports" <% if ((editing  || hasError) && product.categories.indexOf('sports') > -1 ) { %> selected <% } %> >運動関連</option>
+                    <option value="book" <% if ((editing  || hasError) && product.categories.indexOf('book') > -1 ) { %> selected <% } %> >書籍</option>
+                </select>
+            </div>
+            <div class="form-control">
                 <label for="description">Description</label>
                 <textarea 
                     class="<%= validationErrors.find(e => e.param === 'description') ? 'invalid': '' %>" 

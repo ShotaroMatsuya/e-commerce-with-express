@@ -1,4 +1,4 @@
-const path = require('path');//core-moduleなのでinstallする必要はない
+const path = require('path'); //core-moduleなのでinstallする必要はない
 
 const express = require('express');
 const { body } = require('express-validator/check');
@@ -9,29 +9,39 @@ const isAuth = require('../middleware/is-auth');
 const router = express.Router();
 
 //routerメソッドはappメソッドと似たような働き
-router.get('/add-product',isAuth,adminController.getAddProduct);//middlewareは左から右へ順に実行される
+router.get('/add-product', isAuth, adminController.getAddProduct); //middlewareは左から右へ順に実行される
 
-router.get('/products',isAuth,adminController.getProducts);
+router.get('/products', isAuth, adminController.getProducts);
 
-router.post('/add-product',[
-    body('title').isString().isLength({min:3}).trim(),
+router.post(
+  '/add-product',
+  [
+    body('title').isString().isLength({ min: 3 }).trim(),
     // body('imageUrl').isURL(),
     body('price').isFloat(),
-    body('description').isLength({min:5,max:400}).trim()
+    body('description').isLength({ min: 5, max: 400 }).trim(),
+    body('categories').toArray().notEmpty(),
+  ],
+  isAuth,
+  adminController.postAddProduct
+);
 
-],
-isAuth,adminController.postAddProduct);
-
-router.get('/edit-product/:productId',isAuth,adminController.getEditProduct);
-router.post('/edit-product',[
-    body('title').isString().isLength({min:3}).trim(),
+router.get('/edit-product/:productId', isAuth, adminController.getEditProduct);
+router.post(
+  '/edit-product',
+  [
+    body('title').isString().isLength({ min: 3 }).trim(),
     // body('imageUrl').isURL(),
     body('price').isFloat(),
-    body('description').isLength({min:5,max:400}).trim()
-
-],isAuth,adminController.postEditProduct);
-router.delete('/product/:productId',isAuth,adminController.deleteProduct);
+    body('description').isLength({ min: 5, max: 400 }).trim(),
+    body('categories').toArray().notEmpty(),
+  ],
+  isAuth,
+  adminController.postEditProduct
+);
+router.delete('/product/:productId', isAuth, adminController.deleteProduct);
 // nameを指定しないexports
+
 module.exports = router;
 
 // nameを指定するexports

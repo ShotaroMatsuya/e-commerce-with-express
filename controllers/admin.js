@@ -24,6 +24,7 @@ exports.postAddProduct = (req, res, next) => {
   const image = req.file;
   console.log(image);
   const price = req.body.price;
+  const categories = req.body.categories;
   const description = req.body.description;
   if (!image) {
     return res.status(422).render('admin/edit-product', {
@@ -34,6 +35,7 @@ exports.postAddProduct = (req, res, next) => {
         title: title,
         price: price,
         description: description,
+        categories: categories,
       },
       hasError: true,
       errorMessage: 'Attached file is not an image.',
@@ -52,6 +54,7 @@ exports.postAddProduct = (req, res, next) => {
         title: title,
         price: price,
         description: description,
+        categories: categories,
       },
       hasError: true,
       errorMessage: errors.array()[0].msg,
@@ -67,6 +70,7 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     description: description,
     imageUrl: imageUrl,
+    categories: categories,
     userId: req.user, //mongooseはuserモデルインスタンスをそのままセットするとidのみをextractしてくれる
   });
   // const product = new Product(
@@ -141,6 +145,7 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const image = req.file;
   const updatedDesc = req.body.description;
+  const updatedCate = req.body.categories;
 
   const errors = validationResult(req);
 
@@ -154,6 +159,7 @@ exports.postEditProduct = (req, res, next) => {
         price: updatedPrice,
         description: updatedDesc,
         _id: prodId,
+        categories: updatedCate,
       },
       hasError: true,
       errorMessage: errors.array()[0].msg,
@@ -170,6 +176,7 @@ exports.postEditProduct = (req, res, next) => {
       product.title = updatedTitle;
       product.price = updatedPrice;
       product.description = updatedDesc;
+      product.categories = updatedCate;
       if (image) {
         fileHelper.deleteFile(product.imageUrl); //既存のファイルを削除
         product.imageUrl = image.key;

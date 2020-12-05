@@ -2,30 +2,35 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const productSchema = new Schema({
-  title:{
+  title: {
     type: String,
-    required:true
+    required: true,
   },
-  price:{
-    type:Number,
-    required:true
+  price: {
+    type: Number,
+    required: true,
   },
-  description:{
-    type:String,
-    required:true
+  description: {
+    type: String,
+    required: true,
   },
-  imageUrl:{
-    type:String,
-    required:true
+  imageUrl: {
+    type: String,
+    required: true,
   },
-  userId:{
-    type:Schema.Types.ObjectId,
-    ref:'User',//userモデルのidを参照する
-  }
+  categories: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User', //userモデルのidを参照する
+  },
 });
 
-module.exports = mongoose.model('Product',productSchema);
-
+module.exports = mongoose.model('Product', productSchema);
 
 // // with JSON
 
@@ -62,11 +67,11 @@ module.exports = mongoose.model('Product',productSchema);
 
 // //     }
 // //     save(){
-        
+
 // //         getProductsFromFile(products=>{
 // //             if(this.id){//すでにidが存在している場合(updateしたいとき)
 // //                 const existingProductIndex = products.findIndex(prod =>{
-// //                     return prod.id === this.id; 
+// //                     return prod.id === this.id;
 // //                 });
 // //                 const updatedProducts = [...products];
 // //                 updatedProducts[existingProductIndex] = this;
@@ -178,6 +183,5 @@ module.exports = mongoose.model('Product',productSchema);
 //       });
 //   }
 // }
-
 
 // module.exports = Product;

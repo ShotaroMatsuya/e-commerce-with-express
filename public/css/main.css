@@ -83,7 +83,9 @@ form {
   z-index: 100;
 }
 .dropdown-li::after {
-  content: '★';
+  font-family: 'Font Awesome 5 Free';
+  content: '\f02c';
+  color: white;
   font-weight: bold;
 }
 .dropdown-li:hover .dropdown {
@@ -123,7 +125,7 @@ form {
   content: '';
   display: block;
   position: absolute;
-  top: -1rem;
+  top: -0.5rem;
   left: 1rem;
   border-right: 15px solid transparent;
   border-bottom: 15px solid #234a12;

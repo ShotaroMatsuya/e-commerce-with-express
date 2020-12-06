@@ -244,8 +244,8 @@ exports.getCheckout = (req, res, next) => {
           return {
             name: p.productId.title,
             description: p.productId.description,
-            amount: p.productId.price * 100,
-            currency: 'usd',
+            amount: Math.floor(p.productId.price * 1.1),
+            currency: 'jpy',
             quantity: p.quantity,
           };
         }),
@@ -355,6 +355,7 @@ exports.getInvoice = (req, res, next) => {
       }
       const invoiceName = 'invoice-' + orderId + '.pdf';
       const invoicePath = path.join('data', 'invoices', invoiceName);
+      const userName = order.populate('user.userId').user.email;
 
       const pdfDoc = new PDFDocument();
       res.setHeader('Content-Type', 'application/pdf');
@@ -365,28 +366,81 @@ exports.getInvoice = (req, res, next) => {
       pdfDoc.pipe(fs.createWriteStream(invoicePath));
       pdfDoc.pipe(res);
 
-      pdfDoc.fontSize(26).text('Invoice', {
-        underline: true,
-      });
-      pdfDoc.text('----------------------------');
+      pdfDoc.fontSize(30);
+
+      pdfDoc
+        .font(__dirname + '/../fonts/mplus-1p-regular.ttf')
+        .text('請求書', 50, 10);
+      pdfDoc.text('請求書', 50, 10);
+
+      pdfDoc.rect(170, 30, 380, 5).lineWidth(5).stroke('#b4b4b4');
+
+      pdfDoc.fontSize(15);
+      pdfDoc.fillColor('black');
+
+      pdfDoc.text(userName + '　様', 50, 80);
+
+      pdfDoc.rect(60, 147, 230, 20).lineWidth(20).stroke('#b4b4b4');
+
+      pdfDoc.fontSize(10).text('下記の通りご請求申し上げます', 50, 120);
+
+      pdfDoc.fontSize(15);
+
+      pdfDoc.text('ご請求金額', 50, 150);
+
       let totalPrice = 0;
       order.products.forEach(prod => {
         totalPrice += prod.quantity * prod.product.price;
-        pdfDoc
-          .fontSize(14)
-          .text(
-            prod.product.title +
-              ' - ' +
-              prod.quantity +
-              ' x ' +
-              ' $ ' +
-              prod.product.price
-          );
       });
-      pdfDoc.text('----');
-      pdfDoc.fontSize(20).text('Total Price: $ ' + totalPrice);
+      pdfDoc.text(totalPrice + '円', 200, 150);
+      pdfDoc.rect(50, 200, 500, 500).lineWidth(1).stroke('#b4b4b4');
 
+      pdfDoc.fontSize(10);
+
+      pdfDoc.text('品番・品名', 51, 210).stroke();
+
+      pdfDoc.text('単価', 251, 210).stroke();
+
+      pdfDoc.text('数量', 351, 210).stroke();
+
+      pdfDoc.text('金額', 451, 210).stroke();
+
+      pdfDoc.moveTo(50, 230).lineTo(550, 230).stroke('#b4b4b4');
+
+      let x = 50;
+      let y = 240;
+      order.products.forEach(prod => {
+        let proTitle = prod.product.title;
+        let proPrice = prod.product.price;
+        let proQuant = prod.quantity;
+        let proSum = prod.quantity * prod.product.price;
+
+        pdfDoc.text(proTitle, x + 10, y).stroke();
+        pdfDoc.text('¥' + proPrice, x + 210, y).stroke();
+        pdfDoc.text(proQuant, x + 310, y).stroke();
+        pdfDoc.text('¥' + proSum, x + 410, y).stroke();
+        pdfDoc
+          .moveTo(x, y + 20)
+          .lineTo(x + 501, y + 20)
+          .stroke('#b4b4b4');
+
+        y += 30;
+      });
+
+      //Finalize PDF file
       pdfDoc.end();
+
+      // pdfDoc.fontSize(26);
+      // pdfDoc.text('請求書', {
+      //   underline: true,
+      // });
+      // pdfDoc.text('----------------------------');
+
+      // pdfDoc.text('----');
+      // pdfDoc.fontSize(20).text('合計金額: ￥ ' + totalPrice);
+
+      // pdfDoc.end();
+
       // readFileはentire contentを読み込むまで待たないと行けない
       //   fs.readFile(invoicePath,(err,data) =>{
       //     if(err){

@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js",
-    "start-server": "node app.js"
+    "start": "NODE_ENV=develop nodemon app.js",
+    "start-server": "NODE_ENV=develop node app.js"
   },
   "author": "Shotaro",
   "license": "ISC",

@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
+require('dotenv').config();
 //追加しました
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -182,6 +183,7 @@ mongoose
     // https
     //   .createServer({key:privateKey,cert:certificate},app)
     //   .listen(process.env.PORT || 3000);
+    console.log('successfully connected to mongo!');
   })
   .catch(err => {
     console.log(err);

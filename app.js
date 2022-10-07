@@ -3,6 +3,7 @@ const fs = require('fs');
 const https = require('https');
 require('dotenv').config();
 //追加しました
+const serverlessExpress = require('@vendia/serverless-express');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -179,7 +180,9 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(MONGODB_URI)
   .then(result => {
-    app.listen(process.env.PORT || 3000);
+    if (process.env.NODE_ENV === `develop`) {
+      app.listen(process.env.PORT || 3000);
+    }
     // https
     //   .createServer({key:privateKey,cert:certificate},app)
     //   .listen(process.env.PORT || 3000);
@@ -188,3 +191,4 @@ mongoose
   .catch(err => {
     console.log(err);
   });
+exports.handler = serverlessExpress({ app });

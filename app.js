@@ -85,14 +85,14 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
-const accessLogStream = fs.createWriteStream(
-  path.join(__dirname, 'access.log'),
-  { flags: 'a' }
-);
+// const accessLogStream = fs.createWriteStream(
+//   path.join(__dirname, 'access.log'),
+//   { flags: 'a' }
+// );
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
-app.use(morgan('combined', { stream: accessLogStream }));
+// app.use(morgan('combined', { stream: accessLogStream }));
 
 //body-parserはtext系データをx-www-form-urlencodedによって取得することができるが、file(バイナリーデータ)はextractできない
 app.use(bodyParser.urlencoded({ extended: false }));

@@ -4,6 +4,14 @@ const path = require('path');
 const config = require('./config');
 
 const PDFDocument = require('pdfkit');
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
+
+AWS.config.update({
+  aws_access_key_id: process.env.AWS_KEY_ID,
+  aws_secret_access_key: process.env.AWS_SECRET_ACCESS_KEY,
+  region: 'ap-northeast-1',
+});
 
 const Product = require('../models/product');
 const Order = require('../models/order');
@@ -354,17 +362,21 @@ exports.getInvoice = (req, res, next) => {
         return next(new Error('Unauthorized'));
       }
       const invoiceName = 'invoice-' + orderId + '.pdf';
-      const invoicePath = path.join('data', 'invoices', invoiceName);
+      const invoicePath =
+        process.env.NODE_ENV === 'develop'
+          ? path.join('data', 'invoices', invoiceName)
+          : '/tmp/' + invoiceName;
       const userName = order.populate('user.userId').user.email;
 
       const pdfDoc = new PDFDocument();
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader(
-        'Content-Disposition',
-        'inline; filename="' + invoiceName + '"'
-      );
-      pdfDoc.pipe(fs.createWriteStream(invoicePath));
-      pdfDoc.pipe(res);
+      // res.setHeader('Content-Type', 'application/pdf');
+      // res.setHeader(
+      //   'Content-Disposition',
+      //   'inline; filename="' + invoiceName + '"'
+      // );
+      let file = fs.createWriteStream(invoicePath);
+      pdfDoc.pipe(file);
+      // pdfDoc.pipe(res);
 
       pdfDoc.fontSize(30);
 
@@ -456,6 +468,40 @@ exports.getInvoice = (req, res, next) => {
       // res.setHeader('Content-Type','application/pdf');
       // res.setHeader('Content-Disposition','inline; filename="' + invoiceName + '"');
       // file.pipe(res);//resオブジェクトにstreamingしたchunkを押し渡す(nodeアプリケーションがキャッシュを保持する必要がなくなりperformanceの向上が見込める。browserが自分でconcatenateする)
+      file.on('finish', function () {
+        //get the file size
+        const stats = fs.statSync(invoicePath);
+        console.log('filesize: ' + stats.size);
+
+        console.log('starting s3 putObject');
+        s3.putObject(
+          {
+            Bucket: process.env.MY_BUCKET,
+            Key: 'invoices/' + invoiceName,
+            Body: fs.createReadStream(invoicePath),
+            ContentType: 'application/pdf',
+            ContentLength: stats.size,
+            ACL: 'public-read',
+          },
+          function (err) {
+            if (err) {
+              console.log(err, err.stack);
+              next(err);
+            } else {
+              console.log('Done');
+              res.statusCode = 302;
+              res.setHeader(
+                'location',
+                'https://' +
+                  process.env.MY_BUCKET +
+                  '.s3.ap-northeast-1.amazonaws.com/invoices/' +
+                  invoiceName
+              );
+              return res.end();
+            }
+          }
+        );
+      });
     })
     .catch(err => next(err));
 };
